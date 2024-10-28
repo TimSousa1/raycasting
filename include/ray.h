@@ -43,12 +43,7 @@ float2 scale_f2(float2 v, float c);
 float2 normalize_f2(float2 v);
 
 // collisions and general casting
-#ifdef VISUALIZE
 float check_collision(float2 origin, float angle, float distance_resolution, float max_distance, WallNode *head, Wall *collision, float2 world_to_screen_ratio);
 int cast(Frame f, Camera_ c, WallNode *head, float2 world_to_screen_ratio);
-#else
-float check_collision(float2 origin, float angle, float distance_resolution, float max_distance, WallNode *head, Wall *collision);
-int cast(Frame f, Camera_ c, WallNode *head);
-#endif
 
 #endif

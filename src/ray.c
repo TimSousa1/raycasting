@@ -23,7 +23,8 @@ float Q_rsqrt( float number ) {
 }
 
 int get_height(float d, int max_h) {
-    return max_h*max_h / (d*d);
+    float val = max_h*exp(-d*30/max_h);
+    return val;
 }
 
 float2 sum_f2(float2 v1, float2 v2) {
@@ -38,11 +39,8 @@ float2 normalize_f2(float2 v) {
     return scale_f2(v, Q_rsqrt(v.x*v.x + v.y*v.y));
 }
 
-#ifdef VISUALIZE
+
 float check_collision(float2 origin, float angle, float distance_resolution, float max_distance, WallNode *head, Wall *c, float2 w2s) {
-#else
-float check_collision(float2 origin, float angle, float distance_resolution, float max_distance, WallNode *head, Wall *c) {
-#endif
     float2 step = (float2){cosf(DEG2RAD(angle)), sinf(DEG2RAD(angle))};
     step = scale_f2(step, 1/distance_resolution);
 
@@ -67,7 +65,7 @@ float check_collision(float2 origin, float angle, float distance_resolution, flo
                 }
 #endif
                 *c = w;
-                return sqrt(point.x*point.x + point.y*point.y);
+                return sqrt((point.x - origin.x)*(point.x - origin.x) + (point.y - origin.y)*(point.y - origin.y));
             }
 #ifdef VISUALIZE
             if (i % 10 == 0){
@@ -81,11 +79,11 @@ float check_collision(float2 origin, float angle, float distance_resolution, flo
     return -1;
 }
 
-#ifdef VISUALIZE
+Color3 scale_colors(Color3 c1, int c) {
+    return (Color3) {c1.r*c, c1.g*c, c1.b*c, 255};
+}
+
 int cast(Frame f, Camera_ c, WallNode *head, float2 w2s) {
-#else
-int cast(Frame f, Camera_ c, WallNode *head) {
-#endif
     float start_angle = c.dir_angle + (float)c.fov/2;
     float step_angle = (float) c.fov / c.n_rays;
 
@@ -95,11 +93,8 @@ int cast(Frame f, Camera_ c, WallNode *head) {
     Wall collision = {0};
     Color3 to_fill = {255, 0, 0, 255};
     for (int r = 0; r < c.n_rays; r++, angle -= step_angle) {
-#ifdef VISUALIZE
         float d = check_collision(c.pos, angle, c.distance_resolution, c.max_distance, head, &collision, w2s);
-#else
-        float d = check_collision(c.pos, angle, c.distance_resolution, c.max_distance, head, &collision);
-#endif
+
         int h = get_height(d, f.size.y);
 
         to_fill = (Color3){0, 0, 0, 255};
@@ -110,8 +105,10 @@ int cast(Frame f, Camera_ c, WallNode *head) {
 
         for (int i = 0; i < f.size.y; i++) {
             for (int j = 0; j < width; j++) {
-                if ( i < f.size.y/2 + h/2 && i > f.size.y/2 - h/2)
-                    f.pixels[C(r*width+j, i, f.size.x)] = to_fill;
+                if ( (i < f.size.y/2 + h/2 && i > f.size.y/2 - h/2))
+                    f.pixels[C(r*width+j, i, f.size.x)] = scale_colors(to_fill, 255 - (h > f.size.y ? f.size.y : h) * 255 / f.size.y);
+                else 
+                    f.pixels[C(r*width+j, i, f.size.x)] = (Color3){0, 0, 0, 0};
             }
         }
 #ifdef VISUALIZE

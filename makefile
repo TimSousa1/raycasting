@@ -7,9 +7,14 @@ else
 	FLAGS+=-O3
 endif
 
-ifdef VISUALIZE
+ifdef (VISUALIZE)
 	FLAGS+=-lraylib
 	FLAGS+=-D VISUALIZE
+endif
+
+ifdef GAMING_MODE
+	FLAGS+=-lraylib
+	FLAGS+=-D GAMING_MODE
 endif
 
 LDLIBS=-lm
