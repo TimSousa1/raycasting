@@ -7,6 +7,11 @@ else
 	FLAGS+=-O3
 endif
 
+ifdef VISUALIZE
+	FLAGS+=-lraylib
+	FLAGS+=-D VISUALIZE
+endif
+
 LDLIBS=-lm
 
 
@@ -38,4 +43,3 @@ $(BUILDDIR):
 
 clean:
 	rm -r $(BUILDDIR)
-
