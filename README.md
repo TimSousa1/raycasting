@@ -4,7 +4,12 @@ Compile with basic raycasting with
 make
 ```
 
-Compile with raylib visualization by defining VISUALIZATION
+Compile with raylib:
 ```
-make VISUALIZATION=1
+make GAMING_MODE=1
+```
+
+Compile in pure ASCII:
+```
+make ASCII=1
 ```
