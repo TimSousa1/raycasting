@@ -9,6 +9,26 @@
 #include <raylib.h>
 #endif
 
+#ifdef ASCII
+struct timespec time_diff(struct timespec *a, struct timespec *b){
+    struct timespec diff;
+
+    diff.tv_sec = a->tv_sec - b->tv_sec;
+    diff.tv_nsec = a->tv_nsec - b->tv_nsec;
+
+    return diff;
+}
+
+double read_time(struct timespec *a){
+    double s;
+    s = a->tv_sec;
+    s += a->tv_nsec / 1e9;
+
+    return s;
+}
+#endif
+
+
 int main(void) {
     float2 world_dim = {100, 100};
     int2 screen_dim = {1000, 1000};
@@ -127,6 +147,89 @@ int main(void) {
 
         print_to_term(frame_ascii);
     }
+#endif
+
+#ifdef ASCII
+#include "term.h"
+#include <time.h>
+#include <termios.h>
+#include <unistd.h>
+#define FRAMETIME (1.0/120)      // time per frame in seconds (must be <1)
+
+    // player attributes
+    float movespeed = 20*10;
+    float lookspeed = 100*10;
+
+    // TAKEN FROM main.c AT https://github.com/timsousa1/snake
+    // getting terminal ready
+    struct termios original;
+    enableRAW(&original, FRAMETIME*10); // (takes frametime in tenths of a sec)
+
+    // frametime info
+    struct timespec initFRAME;
+    struct timespec midFRAME;
+    struct timespec endFRAME;
+
+    struct timespec ft;         // time that should be spent
+    struct timespec pt;         // time spent processing
+    struct timespec dt = {0};   // total time spent on frame
+    struct timespec remaining;  // time to wait for next frame
+
+    ft.tv_sec = 0;
+    ft.tv_nsec = FRAMETIME * 1e9;
+
+    char key = 0;
+    while (1){
+        // resetting player input
+        key = 0;
+
+        float d = read_time(&dt);
+        clock_gettime(CLOCK_MONOTONIC, &initFRAME);
+        clear_screen();
+
+        // getting player input
+        read(STDIN_FILENO, &key, sizeof(key));
+        tcflush(STDIN_FILENO, TCIFLUSH);              // flushing what wasn't read
+        // printf("got %c from stdin in RAW mode\n", key);
+
+        if (key == 'q') break;
+        
+        ////////////// ACTUAL GAME LOOP ////////////////
+        
+        float2 dir = (float2){cosf(DEG2RAD(c.dir_angle)), sinf(DEG2RAD(c.dir_angle))};
+
+        if (key == 'w') {
+            c.pos = sum_f2(scale_f2(dir, d*movespeed), c.pos);
+        }
+        if (key == 's') {
+            c.pos = sum_f2(scale_f2(dir, -d*movespeed), c.pos);
+        }
+        if (key == 'a') {
+            c.dir_angle += lookspeed*d;
+        }
+        if (key == 'd') {
+            c.dir_angle -= lookspeed*d;
+        }
+
+        cast(f, c, head, (float2) {screen_dim.x / world_dim.x, screen_dim.y / world_dim.y } );
+        downscale(downscaled.pixels, f, downscaled.size.x, downscaled.size.y);
+        ascii(frame_ascii, downscaled);
+        print_to_term(frame_ascii);
+
+        ///////////// CLOCK MUMBO JUMBO ///////////////////
+        clock_gettime(CLOCK_MONOTONIC, &midFRAME);
+        pt = time_diff(&midFRAME, &initFRAME);
+        remaining = time_diff(&ft, &pt);
+
+        nanosleep(&remaining, NULL);
+        clock_gettime(CLOCK_MONOTONIC,&endFRAME);
+
+        dt = time_diff(&endFRAME, &initFRAME);
+        // printf("time taken on frame: %lf\n", read_time(&dt));
+    }
+
+    disableRAW(&original);
+
 #endif
 
     //write_image(f, "out.ppm");

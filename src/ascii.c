@@ -4,7 +4,7 @@
 
 
 char *ascii(char *frame_ascii, Frame f) {
-    char bright_ascii[] = ".,<=#%iHM";
+    char bright_ascii[] = " .,<=#%iHM";
     int n_bright_levels = sizeof(bright_ascii) / sizeof(*bright_ascii);
 
     int i = 0;

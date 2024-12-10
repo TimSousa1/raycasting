@@ -1,2 +1,2 @@
 CompileFlags:
-  Add: [-I../include/, -D VISUALIZE, -D GAMING_MODE]
+  Add: [-I../include/, -D ASCII]

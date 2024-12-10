@@ -7,6 +7,9 @@ else
 	FLAGS+=-O3
 endif
 
+ifdef ASCII
+	FLAGS+=-D ASCII
+endif
 
 ifdef GAMING_MODE
 	FLAGS+=-lraylib
