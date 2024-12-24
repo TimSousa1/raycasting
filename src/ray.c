@@ -7,6 +7,8 @@
 #include <raylib.h>
 #endif
 
+#define LIMIT(val, lim) ( (val > lim ? lim : val) )
+
 // taken from the masters behind quake
 float Q_rsqrt( float number ) {
     long i;
@@ -23,7 +25,8 @@ float Q_rsqrt( float number ) {
 }
 
 int get_height(float d, int max_h) {
-    float val = max_h*exp(-d*30/max_h);
+    // float val = max_h*exp(-d*30/max_h);
+    float val = max_h*20/d;
     return val;
 }
 
@@ -48,30 +51,11 @@ float check_collision(float2 origin, float angle, float distance_resolution, flo
     for (int i = 0; i < max_distance*distance_resolution; i++, point = sum_f2(point, step)) {
         for (WallNode *it = head; it; it = it->next) {
             Wall w = it->w;
-#ifdef VISUALIZE
-            if (i % 10 == 0){
-                // BeginDrawing();
-                // ClearBackground(GRAY);
-                Color c = *(Color*) &w.color;
-                DrawRectangle(w.pos.x*w2s.x, w.pos.y*w2s.y, w.size.x*w2s.x, w.size.y*w2s.y, c);
-                DrawLine(origin.x*w2s.x, origin.y*w2s.y, point.x*w2s.x, point.y*w2s.y, BLACK);
-            }
-#endif
 
             if (point.x > w.pos.x && point.x < w.pos.x+w.size.x && point.y > w.pos.y && point.y < w.pos.y+w.size.y) {
-#ifdef VISUALIZE
-                if (i % 10 == 0){
-                    // EndDrawing();
-                }
-#endif
                 *c = w;
                 return sqrt((point.x - origin.x)*(point.x - origin.x) + (point.y - origin.y)*(point.y - origin.y));
             }
-#ifdef VISUALIZE
-            if (i % 10 == 0){
-                // EndDrawing();
-            }
-#endif
 
         }
     }
@@ -105,24 +89,14 @@ int cast(Frame f, Camera_ c, WallNode *head, float2 w2s) {
 
         for (int i = 0; i < f.size.y; i++) {
             for (int j = 0; j < width; j++) {
-                if ( (i < f.size.y/2 + h/2 && i > f.size.y/2 - h/2))
-                    f.pixels[C(r*width+j, i, f.size.x)] = scale_colors(to_fill, 255 - (h > f.size.y ? f.size.y : h) * 255 / f.size.y);
+                if ( (i < f.size.y/2 + h/2 && i > f.size.y/2 - h/2)) {
+                    float to_scale = d * 255/c.max_distance;
+                    f.pixels[C(r*width+j, i, f.size.x)] = scale_colors(to_fill, LIMIT(to_scale, 255));
+                }
                 else 
-                    f.pixels[C(r*width+j, i, f.size.x)] = (Color3){0, 0, 0, 0};
+                    f.pixels[C(r*width+j, i, f.size.x)] = (Color3) {0, 0, 0, 255};
             }
         }
-#ifdef VISUALIZE
-        BeginDrawing();
-        Image screenImage = { .data = f.pixels, .width = f.size.x, .height = f.size.y, .format = PIXELFORMAT_UNCOMPRESSED_R8G8B8A8, .mipmaps = 1 };
-        Texture2D screenTexture = LoadTextureFromImage(screenImage);
-        DrawTexturePro(screenTexture, 
-                (Rectangle) {.x = 0, .y = 0, .width = f.size.x, .height = f.size.y}, 
-                (Rectangle) {.x = 0, .y = f.size.y - (float)f.size.y/3, .width = (float)f.size.x/3, .height = (float)f.size.y/3}, (Vector2){0, 0}, 0, RAYWHITE);
-
-        EndDrawing();
-        UnloadTexture(screenTexture);
-#endif
-
     }
 
     return 0;

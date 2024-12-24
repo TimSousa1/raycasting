@@ -1,6 +1,8 @@
 #ifndef TIM_TYPES_H
 #define TIM_TYPES_H
 
+
+typedef unsigned int uint;
 typedef unsigned char uchar;
 
 typedef struct {
