@@ -10,6 +10,12 @@
 #endif
 
 #ifdef ASCII
+#include "term.h"
+#include <time.h>
+#include <termios.h>
+#include <unistd.h>
+#define FRAMETIME (1.0/120)      // time per frame in seconds (must be <1)
+
 struct timespec time_diff(struct timespec *a, struct timespec *b){
     struct timespec diff;
 
@@ -37,17 +43,11 @@ int main(void) {
     f.size = screen_dim;
 
     f.pixels = calloc(f.size.x*f.size.y, sizeof(Color3));
-    for (int i = 0; i < f.size.x*f.size.y; i++) {
-        f.pixels[i].a = 255;
-    }
 
     Frame downscaled;
     downscaled.size = (int2) {100, 100};
 
     downscaled.pixels = calloc(downscaled.size.x*downscaled.size.y, sizeof(Color3));
-    for (int i = 0; i < downscaled.size.x*downscaled.size.y; i++) {
-        downscaled.pixels[i].a = 255;
-    }
 
     Camera_ c;
     c.pos = (float2) {world_dim.x/3 , world_dim.y/1.4};
@@ -61,13 +61,14 @@ int main(void) {
     WallNode *head = test_scene(world_dim);
 
     char frame_ascii[downscaled.size.x*downscaled.size.y + downscaled.size.y + 1];
-    frame_ascii[sizeof(frame_ascii)] = 0; // set null char
+    frame_ascii[sizeof(frame_ascii)/sizeof(*frame_ascii) -1] = 0; // set null char
     
     cast(f, c, head, (float2) {screen_dim.x / world_dim.x, screen_dim.y / world_dim.y } );
     // downscale(downscaled.pixels, f, downscaled.size.x, downscaled.size.y);
     // printf("%s", ascii(frame_ascii, downscaled));
 
 #if GAMING_MODE
+
     InitWindow(screen_dim.x, screen_dim.y, "raycast visualization");
     SetTargetFPS(240);
     SetWindowMonitor(2);
@@ -112,11 +113,11 @@ int main(void) {
 
 
         cast(f, c, head, (float2) {screen_dim.x / world_dim.x, screen_dim.y / world_dim.y } );
-        Image screenImage = { .data = f.pixels, .width = f.size.x, .height = f.size.y, .format = PIXELFORMAT_UNCOMPRESSED_R8G8B8A8, .mipmaps = 1 };
+        Image screenImage = { .data = f.pixels, .width = f.size.x, .height = f.size.y, .format = PIXELFORMAT_UNCOMPRESSED_R8G8B8, .mipmaps = 1 };
         Texture2D screenTexture = LoadTextureFromImage(screenImage);
 
         downscale(downscaled.pixels, f, downscaled.size.x, downscaled.size.y);
-        Image downscaled_screenImage = { .data = downscaled.pixels, .width = downscaled.size.x, .height = downscaled.size.y, .format = PIXELFORMAT_UNCOMPRESSED_R8G8B8A8, .mipmaps = 1 };
+        Image downscaled_screenImage = { .data = downscaled.pixels, .width = downscaled.size.x, .height = downscaled.size.y, .format = PIXELFORMAT_UNCOMPRESSED_R8G8B8, .mipmaps = 1 };
         Texture2D downscaled_screenTexture = LoadTextureFromImage(downscaled_screenImage);
 
         ascii(frame_ascii, downscaled);

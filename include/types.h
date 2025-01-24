@@ -19,7 +19,6 @@ typedef struct {
     uchar r;
     uchar g;
     uchar b;
-    uchar a;
 } Color3;
 
 #endif

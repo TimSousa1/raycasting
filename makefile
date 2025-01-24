@@ -32,7 +32,7 @@ INC := $(shell find $(INCDIR) -name "*.h")
 OUTNAME := ray
 
 $(BUILDDIR)/%.o: $(SRCDIR)/%.c $(INC) | $(BUILDDIR)
-	$(CC) -o $@ -c $< $(FLAGS) -I $(INCDIR) $(LDLIBS)
+	$(CC) -o $@ -c $< $(FLAGS) -I $(INCDIR)
 
 
 $(OUTNAME): $(OBJ)

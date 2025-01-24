@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include "image.h"
 
-#define c3i(b) (Color3) {b, b, b, 255}
+#define c3i(b) (Color3) {b, b, b}
 
 int color_region(Color3 *image, Color3 color, int2 pos, int2 size, int xmax, int ymax) {
     for (int y = pos.y; y < pos.y+size.y; y++) {
@@ -22,7 +22,7 @@ int downscale(Color3 *out_image, Frame f, uint sizex, uint sizey) {
     int ratiox = f.size.x/sizex;
     int ratioy = f.size.y/sizey;
 
-    printf("image ratio: %d, %d\n", ratiox, ratioy);
+    // printf("image ratio: %d, %d\n", ratiox, ratioy);
     int i = 0; // indexing output image
     for (int y = 0; y < f.size.y; y+=ratioy) {
         for (int x = 0; x < f.size.x; x+=ratiox) {
