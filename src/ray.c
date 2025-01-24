@@ -64,7 +64,7 @@ float check_collision(float2 origin, float angle, float distance_resolution, flo
 }
 
 Color3 scale_colors(Color3 c1, int c) {
-    return (Color3) {c1.r*c, c1.g*c, c1.b*c, 255};
+    return (Color3) {c1.r*c, c1.g*c, c1.b*c};
 }
 
 int cast(Frame f, Camera_ c, WallNode *head, float2 w2s) {
@@ -75,13 +75,13 @@ int cast(Frame f, Camera_ c, WallNode *head, float2 w2s) {
     int width = f.size.x / c.n_rays;
 
     Wall collision = {0};
-    Color3 to_fill = {255, 0, 0, 255};
+    Color3 to_fill = {255, 0, 0};
     for (int r = 0; r < c.n_rays; r++, angle -= step_angle) {
         float d = check_collision(c.pos, angle, c.distance_resolution, c.max_distance, head, &collision, w2s);
 
         int h = get_height(d, f.size.y);
 
-        to_fill = (Color3){0, 0, 0, 255};
+        to_fill = (Color3){0, 0, 0};
 
         if (d >= 0) {
             to_fill = collision.color;
@@ -94,7 +94,7 @@ int cast(Frame f, Camera_ c, WallNode *head, float2 w2s) {
                     f.pixels[C(r*width+j, i, f.size.x)] = scale_colors(to_fill, LIMIT(to_scale, 255));
                 }
                 else 
-                    f.pixels[C(r*width+j, i, f.size.x)] = (Color3) {0, 0, 0, 255};
+                    f.pixels[C(r*width+j, i, f.size.x)] = (Color3) {0, 0, 0};
             }
         }
     }
